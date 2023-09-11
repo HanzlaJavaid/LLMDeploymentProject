@@ -18,12 +18,13 @@ data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-base_model_name = "NousResearch/Llama-2-7b-chat-hf"
+# base_model_name = "NousResearch/Llama-2-7b-chat-hf"
+base_model_name = "hanzla/llama2chatfinetune"
 refined_model = "llama2chatfinetune"
 real_model = "NousResearch/Llama-2-7b-chat-hf"
 
 # Tokenizer
-llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+llama_tokenizer = AutoTokenizer.from_pretrained(real_model, trust_remote_code=True)
 llama_tokenizer.pad_token = llama_tokenizer.eos_token
 llama_tokenizer.padding_side = "right"  # Fix for fp16
 
@@ -88,5 +89,5 @@ fine_tuning = SFTTrainer(
 fine_tuning.train()
 
 # Save Model
-fine_tuning.model.save_pretrained(refined_model)
-fine_tuning.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
+fine_tuning.save_model(refined_model)
+fine_tuningm.model.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
