@@ -11,8 +11,8 @@ from transformers import (
 from peft import LoraConfig, AutoPeftModelForCausalLM, PeftModel
 from trl import SFTTrainer
 
-refined_model = "llama2fntest"
-remote_repo = "hanzla/llama2fntest"
+refined_model = "Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+remote_repo = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
 
 hf_read_token = "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"
 hf_write_token = "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"
@@ -22,8 +22,8 @@ data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-base_model_name = "hanzla/llama2fntest"
-real_model_name = "NousResearch/Llama-2-7b-chat-hf"
+base_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
+real_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
 
 # Tokenizer
 llama_tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
@@ -67,7 +67,7 @@ train_params = TrainingArguments(
     per_device_train_batch_size=4,
     gradient_accumulation_steps=1,
     optim="paged_adamw_32bit",
-    save_steps=5,
+    save_steps=10,
     logging_steps=1,
     learning_rate=2e-4,
     weight_decay=0.001,
@@ -116,3 +116,4 @@ tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
 model_to_save.push_to_hub(remote_repo,token = hf_write_token)
+tokenizer.push_to_hub(remote_repo,token = hf_write_token)
