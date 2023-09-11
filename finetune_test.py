@@ -8,7 +8,7 @@ from transformers import (
     TrainingArguments,
     pipeline
 )
-from peft import LoraConfig, AutoPeftModelForCausalLM
+from peft import LoraConfig, AutoPeftModelForCausalLM. PeftModel
 from trl import SFTTrainer
 
 refined_model = "llama2fntest"
@@ -52,44 +52,34 @@ lora_r = 8
 
 # LoRA Config
 peft_parameters = LoraConfig(
-    lora_alpha=lora_alpha,
-    lora_dropout=lora_dropout,
-    r=lora_r,
+    lora_alpha=16,
+    lora_dropout=0.1,
+    r=8,
     bias="none",
     task_type="CAUSAL_LM"
-    # target_modules=["q_proj","v_proj"]
-    #target_modules=['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
 )
 
 # Training Params
-output_dir = "./results"
-per_device_train_batch_size = 4
-gradient_accumulation_steps = 4
-optim = "paged_adamw_32bit"
-save_steps = 10
-logging_steps = 1
-learning_rate = 2e-4
-max_grad_norm = 0.3
-max_steps = 10
-warmup_ratio = 0.03
-lr_scheduler_type = "constant"
-
 train_params = TrainingArguments(
-    output_dir=output_dir,
-    per_device_train_batch_size=per_device_train_batch_size,
-    gradient_accumulation_steps=gradient_accumulation_steps,
-    optim=optim,
-    save_steps=save_steps,
-    logging_steps=logging_steps,
-    learning_rate=learning_rate,
-    fp16=True,
-    max_grad_norm=max_grad_norm,
-    max_steps=max_steps,
-    warmup_ratio=warmup_ratio,
+    output_dir="./results",
+    num_train_epochs=1,
+    per_device_train_batch_size=4,
+    gradient_accumulation_steps=1,
+    optim="paged_adamw_32bit",
+    save_steps=5,
+    logging_steps=1,
+    learning_rate=2e-4,
+    weight_decay=0.001,
+    fp16=False,
+    bf16=False,
+    max_grad_norm=0.3,
+    max_steps=10,
+    warmup_ratio=0.03,
     group_by_length=True,
-    lr_scheduler_type=lr_scheduler_type,
-    ddp_find_unused_parameters=False,
+    lr_scheduler_type="constant",
+    report_to="tensorboard"
 )
+
 
 # Trainer
 fine_tuning = SFTTrainer(
