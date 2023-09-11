@@ -38,7 +38,7 @@ quant_config = BitsAndBytesConfig(
 )
 
 # Model
-base_model = AutoPeftModelForCausalLM.from_pretrained(
+base_model = AutoModelForCausalLM.from_pretrained(
     base_model_name,
     quantization_config=quant_config,
     device_map={"": 0},
