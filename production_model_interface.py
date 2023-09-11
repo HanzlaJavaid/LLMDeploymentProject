@@ -20,6 +20,9 @@ from transformers import (
     TrainingArguments,
     pipeline
 )
+import torch
+from peft import LoraConfig, AutoPeftModelForCausalLM, PeftModel
+from trl import SFTTrainer
 
 model_name_or_path = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
 base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
