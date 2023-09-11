@@ -26,7 +26,7 @@ base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
 real_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
 
 tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
-tokenizer.pad_token = llama_tokenizer.eos_token
+tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"  # Fix for fp16
 
 def createPrompt(template):
