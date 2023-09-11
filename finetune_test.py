@@ -1,3 +1,4 @@
+device_map={"": 0}
 import torch
 from datasets import load_dataset
 from transformers import (
@@ -10,6 +11,9 @@ from transformers import (
 from peft import LoraConfig, AutoPeftModelForCausalLM
 from trl import SFTTrainer
 
+refined_model = "llama2fntest"
+remote_repo = "hanzla/llama2fntest"
+
 hf_read_token = "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"
 hf_write_token = "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"
 
@@ -18,13 +22,10 @@ data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-# base_model_name = "NousResearch/Llama-2-7b-chat-hf"
-base_model_name = "hanzla/llama2chatfinetune"
-refined_model = "llama2chatfinetune"
-real_model = "NousResearch/Llama-2-7b-chat-hf"
+base_model_name = "NousResearch/Llama-2-7b-chat-hf"
 
 # Tokenizer
-llama_tokenizer = AutoTokenizer.from_pretrained(real_model, trust_remote_code=True)
+llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
 llama_tokenizer.pad_token = llama_tokenizer.eos_token
 llama_tokenizer.padding_side = "right"  # Fix for fp16
 
@@ -45,11 +46,9 @@ base_model = AutoPeftModelForCausalLM.from_pretrained(
 base_model.config.use_cache = False
 base_model.config.pretraining_tp = 1
 
-merged_model = base_model.merge_and_unload()
-
 lora_alpha = 16
 lora_dropout = 0.1
-lora_r = 64
+lora_r = 8
 
 # LoRA Config
 peft_parameters = LoraConfig(
@@ -57,9 +56,9 @@ peft_parameters = LoraConfig(
     lora_dropout=lora_dropout,
     r=lora_r,
     bias="none",
-    task_type="CAUSAL_LM",
+    task_type="CAUSAL_LM"
     # target_modules=["q_proj","v_proj"]
-    target_modules=['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
+    #target_modules=['q_proj', 'o_proj', 'gate_proj', 'up_proj', 'down_proj', 'k_proj', 'v_proj'] # Choose all linear layers from the model
 )
 
 # Training Params
@@ -94,7 +93,7 @@ train_params = TrainingArguments(
 
 # Trainer
 fine_tuning = SFTTrainer(
-    model=merged_model,
+    model=base_model,
     train_dataset=training_data,
     peft_config=peft_parameters,
     dataset_text_field="text",
@@ -107,4 +106,22 @@ fine_tuning.train()
 
 # Save Model
 fine_tuning.model.save_pretrained(refined_model)
-fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
+
+# Reload model in FP16 and merge it with LoRA weights
+base_model_FP16 = AutoModelForCausalLM.from_pretrained(
+    base_model_name,
+    low_cpu_mem_usage=True,
+    return_dict=True,
+    torch_dtype=torch.float16,
+    device_map=device_map,
+)
+
+model_to_save = PeftModel.from_pretrained(base_model_FP16, refined_model)
+model_to_save = model_to_save.merge_and_unload()
+
+# Reload tokenizer to save it
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+tokenizer.pad_token = tokenizer.eos_token
+tokenizer.padding_side = "right"
+
+model_to_save.push_to_hub(remote_repo,token = hf_write_token)
