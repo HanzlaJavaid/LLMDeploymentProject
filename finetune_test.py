@@ -110,7 +110,7 @@ model_to_save = PeftModel.from_pretrained(base_model_FP16, refined_model)
 model_to_save = model_to_save.merge_and_unload()
 
 # Reload tokenizer to save it
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
