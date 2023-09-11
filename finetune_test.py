@@ -76,7 +76,7 @@ train_params = TrainingArguments(
 
 # Trainer
 fine_tuning = SFTTrainer(
-    model=fine_tuning.model,
+    model=base_model,
     train_dataset=training_data,
     peft_config=peft_parameters,
     dataset_text_field="text",
