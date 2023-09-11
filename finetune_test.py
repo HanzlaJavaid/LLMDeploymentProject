@@ -7,7 +7,7 @@ from transformers import (
     TrainingArguments,
     pipeline
 )
-from peft import LoraConfig
+from peft import LoraConfig, AutoPeftModelForCausalLM
 from trl import SFTTrainer
 
 hf_read_token = "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"
@@ -37,7 +37,7 @@ quant_config = BitsAndBytesConfig(
 )
 
 # Model
-base_model = AutoModelForCausalLM.from_pretrained(
+base_model = AutoPeftModelForCausalLM.from_pretrained(
     base_model_name,
     quantization_config=quant_config,
     device_map={"": 0},
@@ -89,5 +89,5 @@ fine_tuning = SFTTrainer(
 fine_tuning.train()
 
 # Save Model
-fine_tuning.save_model(refined_model)
-fine_tuningm.model.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
+fine_tuning.model.save_pretrained(refined_model)
+fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
