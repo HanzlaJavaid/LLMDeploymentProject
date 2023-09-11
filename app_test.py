@@ -2,13 +2,14 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 #from ggml_model_test import generate, AI_INIT
-from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
+#from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
+from production_model_interface import generate, AI_INIT, count_tokens,model_name_or_path
 from pydantic import BaseModel
 import json
 from typing import List
 import datetime
 import random
-
+from connect_dynamodb import DynamoDBManager
 chain = AI_INIT(prompt_template="""
 SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user.
 
@@ -22,23 +23,10 @@ def generate_random_id(length):
     number_string = ''.join([str(random.randint(0, 9)) for _ in range(length)])
     return number_string
 
-def conversation_history_format(history):
-    formatted_messages = "\n".join([f"User: {msg.user_message}\nAssistant: {msg.assistant_reply}" for msg in history])
-    return formatted_messages
-
 def conversation_history_format_new(history):
     formatted_messages = "\n".join([f"{msg.role}: {msg.content}" for msg in history])
     print(formatted_messages)
     return formatted_messages
-
-class Message(BaseModel):
-    user_message: str
-    assistant_reply: str
-
-class PostData(BaseModel):
-    previous_messages: List[Message]
-    user_message: str
-    get_context: bool
 
 class MessageObject(BaseModel):
     role: str
@@ -49,38 +37,18 @@ class DataObject(BaseModel):
     messages: List[MessageObject]
     temperature: float
 
+class DataFineTuneObject(BaseModel):
+	user_message: str
+	ai_message: str
+
+class TrainParamsObject(BaseModel):
+        current_ds: str
+
 
 app = FastAPI()
-
+database = DynamoDBManager()
 @app.post('/generate')
-async def reply(data: PostData):
-    try:
-        history_raw = data.previous_messages
-        history = conversation_history_format(history_raw)
-        print(history)
-        user_message = str(data.user_message)
-        print(user_message)
-        ai_response = generate(chain=chain, user_input=user_message,conversation_history=history)
-        if (data.get_context):
-            response = {
-                "conversation_history": jsonable_encoder(data.previous_messages),
-                "user_message":user_message,
-                "assistant_reply":ai_response
-            }
-        else:
-            response = {
-                "user_message":user_message,
-                "assistant_reply":ai_response
-                }
-
-        return JSONResponse(content=response)
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-
-@app.post('/generate_test')
-async def reply_test(data: DataObject):
+async def reply(data: DataObject):
     try:
         messages = data.messages
     
@@ -129,3 +97,28 @@ async def reply_test(data: DataObject):
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+@app.post('/store_response')
+async def store_response(data: DataFineTuneObject):
+	try:
+		print(data)
+		database.create_document({'user_message': data.user_message, 'ai_message':data.ai_message})
+
+		response = {
+			"message": "Feedback_stored",
+			"feedback": f"user_message: {data.user_message} ai_message:{data.ai_message}"			
+}
+		return JSONResponse(content=response)
+	except Exception as e:
+		print(f"An error occurred: {e}")
+		raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@app.post('/train')
+async def train(data: TrainParamsObject):
+       try:
+               print(data)
+               response = database.fetch_document(data.current_ds)
+               print(response)
+       except Exception as e:
+               print(f"An error occurred: {e}")
+               raise HTTPException(status_code=500, detail="Internal Server Error")	
