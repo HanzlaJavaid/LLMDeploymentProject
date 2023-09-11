@@ -89,4 +89,4 @@ fine_tuning.train()
 
 # Save Model
 fine_tuning.model.save_pretrained(refined_model)
-#fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",access_token = hf_write_token)
+fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",token = hf_write_token)
