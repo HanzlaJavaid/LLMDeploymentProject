@@ -45,6 +45,8 @@ base_model = AutoPeftModelForCausalLM.from_pretrained(
 base_model.config.use_cache = False
 base_model.config.pretraining_tp = 1
 
+merged_model = base_model.merge_and_unload()
+
 lora_alpha = 16
 lora_dropout = 0.1
 lora_r = 64
@@ -92,7 +94,7 @@ train_params = TrainingArguments(
 
 # Trainer
 fine_tuning = SFTTrainer(
-    model=base_model,
+    model=merged_model,
     train_dataset=training_data,
     peft_config=peft_parameters,
     dataset_text_field="text",
