@@ -40,7 +40,6 @@ base_model = AutoModelForCausalLM.from_pretrained(
     base_model_name,
     quantization_config=quant_config,
     device_map={"": 0},
-    access_token = hf_read_token
 )
 base_model.config.use_cache = False
 base_model.config.pretraining_tp = 1
@@ -89,5 +88,5 @@ fine_tuning = SFTTrainer(
 fine_tuning.train()
 
 # Save Model
-# fine_tuning.model.save_pretrained(refined_model)
-fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",access_token = hf_write_token)
+fine_tuning.model.save_pretrained(refined_model)
+#fine_tuning.model.push_to_hub("hanzla/llama2chatfinetune",access_token = hf_write_token)
