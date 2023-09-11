@@ -22,10 +22,11 @@ data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-base_model_name = "NousResearch/Llama-2-7b-chat-hf"
+base_model_name = "hanzla/llama2fntest"
+real_model_name = "NousResearch/Llama-2-7b-chat-hf"
 
 # Tokenizer
-llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+llama_tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
 llama_tokenizer.pad_token = llama_tokenizer.eos_token
 llama_tokenizer.padding_side = "right"  # Fix for fp16
 
@@ -110,7 +111,7 @@ model_to_save = PeftModel.from_pretrained(base_model_FP16, refined_model)
 model_to_save = model_to_save.merge_and_unload()
 
 # Reload tokenizer to save it
-tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
