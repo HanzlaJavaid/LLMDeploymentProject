@@ -8,7 +8,7 @@ from transformers import (
     TrainingArguments,
     pipeline
 )
-from peft import LoraConfig, AutoPeftModelForCausalLM. PeftModel
+from peft import LoraConfig, AutoPeftModelForCausalLM PeftModel
 from trl import SFTTrainer
 
 refined_model = "llama2fntest"
