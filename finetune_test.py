@@ -23,7 +23,7 @@ refined_model = "llama2chatfinetune"
 real_model = "NousResearch/Llama-2-7b-chat-hf"
 
 # Tokenizer
-llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True,access_token = hf_read_token)
+llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
 llama_tokenizer.pad_token = llama_tokenizer.eos_token
 llama_tokenizer.padding_side = "right"  # Fix for fp16
 
