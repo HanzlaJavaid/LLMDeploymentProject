@@ -47,6 +47,7 @@ base_model = AutoGPTQForCausalLM.from_quantized(
     quantization_config=quant_config,
     use_safetensors=True,
     trust_remote_code=True,
+    use_triton=True,
     device_map={"": 0},
 )
 base_model.config.use_cache = False
