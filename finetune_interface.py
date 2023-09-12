@@ -31,6 +31,8 @@ def finetune(train_df):
         "train": Dataset.from_pandas(train_df),
     })
     training_data=train_dataset_dict['train']
+    
+    print("Finetune data initialized")
 
     return True
     # Tokenizer
@@ -54,6 +56,9 @@ def finetune(train_df):
     )
     base_model.config.use_cache = False
     base_model.config.pretraining_tp = 1
+
+    print("Model initialized")
+
 
     lora_alpha = 16
     lora_dropout = 0.1
@@ -100,11 +105,17 @@ def finetune(train_df):
         args=train_params
     )
 
+    print("Trainer Initialized")
+
+
     # Training
     fine_tuning.train()
 
     # Save Model
     fine_tuning.model.save_pretrained(refined_model)
+
+    print("Training completed")
+
 
     # Reload model in FP16 and merge it with LoRA weights
     base_model_FP16 = AutoModelForCausalLM.from_pretrained(
@@ -118,6 +129,8 @@ def finetune(train_df):
     model_to_save = PeftModel.from_pretrained(base_model_FP16, refined_model)
     model_to_save = model_to_save.merge_and_unload()
 
+    print("Merging models")
+
     # Reload tokenizer to save it
     tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
     tokenizer.pad_token = tokenizer.eos_token
@@ -125,5 +138,7 @@ def finetune(train_df):
 
     model_to_save.push_to_hub(remote_repo,token = hf_write_token)
     tokenizer.push_to_hub(remote_repo,token = hf_write_token)
+
+    print("Finetuned model saved in HF.")
 
     return True
