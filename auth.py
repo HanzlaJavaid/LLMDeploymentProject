@@ -1,2 +1,2 @@
-hf_read_token = "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"
-hf_write_token = "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"
+hf_read_token = "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"
+hf_write_token = "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"

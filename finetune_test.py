@@ -17,15 +17,15 @@ from huggingface_hub import login
 login(token=hf_write_token)
 
 refined_model = "Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-remote_repo = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+remote_repo = "hcevik/customml-test"
 
 # Dataset
 data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-real_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+base_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
+real_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
 
 # Tokenizer
 llama_tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
@@ -119,11 +119,3 @@ tokenizer.padding_side = "right"
 
 model_to_save.push_to_hub(remote_repo,token = hf_write_token)
 tokenizer.push_to_hub(remote_repo,token = hf_write_token)
-
-
-#TODO
-#df_train = pd.read_json(data_path)
-#train_dataset_dict = DatasetDict({
-#    "train": Dataset.from_pandas(df_train),
-#})
-#train_dataset=train_dataset_dict['train']
