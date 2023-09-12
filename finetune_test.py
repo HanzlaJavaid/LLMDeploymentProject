@@ -119,3 +119,11 @@ tokenizer.padding_side = "right"
 
 model_to_save.push_to_hub(remote_repo,token = hf_write_token)
 tokenizer.push_to_hub(remote_repo,token = hf_write_token)
+
+
+#TODO
+#df_train = pd.read_json(data_path)
+#train_dataset_dict = DatasetDict({
+#    "train": Dataset.from_pandas(df_train),
+#})
+#train_dataset=train_dataset_dict['train']

@@ -9,6 +9,8 @@ from typing import List
 import datetime
 import random
 from connect_dynamodb import DynamoDBManager
+from dynamodb_json import json_util
+import pandas as pd
 chain = AI_INIT(prompt_template="""
 SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user.
 
@@ -117,7 +119,9 @@ async def train(data: TrainParamsObject):
        try:
                print(data)
                response = database.fetch_document(data.current_ds)
+               data_object = pd.DataFrame(json_util.loads(response))
                print(response)
+               print(data_object.head())
        except Exception as e:
                print(f"An error occurred: {e}")
                raise HTTPException(status_code=500, detail="Internal Server Error")	
