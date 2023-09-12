@@ -23,10 +23,15 @@ from transformers import (
 import torch
 from peft import LoraConfig, AutoPeftModelForCausalLM, PeftModel
 from trl import SFTTrainer
+from auth import hf_write_token
 
-model_name_or_path = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
-base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-real_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
+from huggingface_hub import login
+
+login(hf_write_token)
+
+model_name_or_path = "hcevik/customml-test"
+base_model_name = "hcevik/customml-test"
+real_model_name = "hcevik/customml-test"
 
 tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token

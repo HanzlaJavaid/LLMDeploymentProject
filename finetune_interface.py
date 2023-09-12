@@ -17,10 +17,10 @@ from auth import hf_read_token, hf_write_token
 from huggingface_hub import login
 
 refined_model = "Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-remote_repo = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+remote_repo = "hcevik/customml-test"
 
-base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-real_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+base_model_name = "hcevik/customml-test"
+real_model_name = "hcevik/customml-test"
 
 def finetune(train_df):
 
@@ -34,7 +34,7 @@ def finetune(train_df):
     
     print("Finetune data initialized")
 
-    return True
+    
     # Tokenizer
     llama_tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
     llama_tokenizer.pad_token = llama_tokenizer.eos_token
