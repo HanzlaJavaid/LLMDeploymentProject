@@ -1,0 +1,2 @@
+hf_read_token = "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"
+hf_write_token = "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"

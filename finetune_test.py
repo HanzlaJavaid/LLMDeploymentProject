@@ -11,19 +11,21 @@ from transformers import (
 from peft import LoraConfig, AutoPeftModelForCausalLM, PeftModel
 from trl import SFTTrainer
 
+from auth import hf_read_token, hf_write_token
+
+from huggingface_hub import login
+login(token=hf_write_token)
+
 refined_model = "Wizard-Vicuna-7B-Uncensored-HF_REFINED"
 remote_repo = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
-
-hf_read_token = "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"
-hf_write_token = "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"
 
 # Dataset
 data_name = "mlabonne/guanaco-llama2-1k"
 training_data = load_dataset(data_name, split="train")
 
 # Model and tokenizer names
-base_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
-real_model_name = "TheBloke/Wizard-Vicuna-7B-Uncensored-HF"
+base_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
+real_model_name = "hanzla/Wizard-Vicuna-7B-Uncensored-HF_REFINED"
 
 # Tokenizer
 llama_tokenizer = AutoTokenizer.from_pretrained(real_model_name, trust_remote_code=True)
