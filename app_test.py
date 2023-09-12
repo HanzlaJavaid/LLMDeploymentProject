@@ -48,7 +48,9 @@ class DataFineTuneObject(BaseModel):
 	ai_message: str
 
 class TrainParamsObject(BaseModel):
-        current_ds: str
+        cutoff_date: str
+        finetune_epochs: int
+        batch_size: int
 
 
 app = FastAPI()
@@ -122,7 +124,7 @@ async def store_response(data: DataFineTuneObject):
 @app.post('/train')
 async def train(data: TrainParamsObject):
        try:
-               response = database.fetch_document(data.current_ds)
+               response = database.fetch_document(data.cutoff_date)
                data_object = pd.DataFrame(json_util.loads(response))
                data_object["text"] = "SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user. \n User: " + data_object["user_message"] + "\n" + "ASSISTANT: " + data_object["ai_message"]
                print(data_object.head())

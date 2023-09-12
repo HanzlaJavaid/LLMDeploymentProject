@@ -22,7 +22,7 @@ remote_repo = "hcevik/customml-test"
 base_model_name = "hcevik/customml-test"
 real_model_name = "hcevik/customml-test"
 
-def finetune(train_df):
+def finetune(train_df,finetune_epochs = 10,batch_size=4):
 
     login(token=hf_write_token)
 
@@ -72,22 +72,22 @@ def finetune(train_df):
         bias="none",
         task_type="CAUSAL_LM"
     )
-
+    save_steps = finetune_epochs + 1
     # Training Params
     train_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=1,
-        per_device_train_batch_size=4,
-        gradient_accumulation_steps=1,
+        per_device_train_batch_size=batch_size,
+        gradient_accumulation_steps=batch_size,
         optim="paged_adamw_32bit",
-        save_steps=10,
+        save_steps=save_steps,
         logging_steps=1,
         learning_rate=2e-4,
         weight_decay=0.001,
         fp16=False,
         bf16=False,
         max_grad_norm=0.3,
-        max_steps=10,
+        max_steps=finetune_epochs,
         warmup_ratio=0.03,
         group_by_length=True,
         lr_scheduler_type="constant",

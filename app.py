@@ -2,7 +2,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 #from ggml_model_test import generate, AI_INIT
-from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
+#from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
+from production_model_interface import generate, AI_INIT, count_tokens,model_name_or_path
 from pydantic import BaseModel
 import json
 from typing import List
@@ -11,6 +12,10 @@ import random
 from connect_dynamodb import DynamoDBManager
 from dynamodb_json import json_util
 import pandas as pd
+from finetune_interface import finetune
+import os
+import sys
+
 chain = AI_INIT(prompt_template="""
 SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user.
 
@@ -43,7 +48,9 @@ class DataFineTuneObject(BaseModel):
 	ai_message: str
 
 class TrainParamsObject(BaseModel):
-        current_ds: str
+        cutoff_date: str
+        finetune_epochs: int
+        batch_size: int
 
 
 app = FastAPI()
@@ -117,12 +124,18 @@ async def store_response(data: DataFineTuneObject):
 @app.post('/train')
 async def train(data: TrainParamsObject):
        try:
-               print(data)
-               response = database.fetch_document(data.current_ds)
+               response = database.fetch_document(data.cutoff_date)
                data_object = pd.DataFrame(json_util.loads(response))
                data_object["text"] = "SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user. \n User: " + data_object["user_message"] + "\n" + "ASSISTANT: " + data_object["ai_message"]
-               print(response)
                print(data_object.head())
+               finetune(train_df = data_object,finetune_epochs = data.finetune_epochs,batch_size=data.batch_size)
+               print("Finetune Complete")
+               os.execv(sys.executable, ['python'] + sys.argv)
+
        except Exception as e:
                print(f"An error occurred: {e}")
                raise HTTPException(status_code=500, detail="Internal Server Error")	
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
