@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 #from ggml_model_test import generate, AI_INIT
-from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
-#from production_model_interface import generate, AI_INIT, count_tokens,model_name_or_path
+#from gptq_model_run import generate, AI_INIT, count_tokens,model_name_or_path
+from production_model_interface import generate, AI_INIT, count_tokens,model_name_or_path
 from pydantic import BaseModel
 import json
 from typing import List
