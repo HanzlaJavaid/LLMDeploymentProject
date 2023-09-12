@@ -120,6 +120,7 @@ async def train(data: TrainParamsObject):
                print(data)
                response = database.fetch_document(data.current_ds)
                data_object = pd.DataFrame(json_util.loads(response))
+               data_object["text"] = "SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user. \n User: " + data_object["user_message"] + "\n" + "ASSISTANT: " + data_object["ai_message"]
                print(response)
                print(data_object.head())
        except Exception as e:
