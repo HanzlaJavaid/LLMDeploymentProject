@@ -10,6 +10,12 @@ from typing import List
 import datetime
 import random
 from connect_dynamodb import DynamoDBManager
+from dynamodb_json import json_util
+import pandas as pd
+from finetune_interface import finetune
+import os
+import sys
+
 chain = AI_INIT(prompt_template="""
 SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user.
 
@@ -116,9 +122,18 @@ async def store_response(data: DataFineTuneObject):
 @app.post('/train')
 async def train(data: TrainParamsObject):
        try:
-               print(data)
                response = database.fetch_document(data.current_ds)
-               print(response)
+               data_object = pd.DataFrame(json_util.loads(response))
+               data_object["text"] = "SYSTEM: You are a helpful assistant that answers questions of user. Be respectful, dont try to answer things you dont know. Be friendly with the user. \n User: " + data_object["user_message"] + "\n" + "ASSISTANT: " + data_object["ai_message"]
+               print(data_object.head())
+               finetune(train_df = data_object)
+               print("Finetune Complete")
+               os.execv(sys.executable, ['python'] + sys.argv)
+
        except Exception as e:
                print(f"An error occurred: {e}")
                raise HTTPException(status_code=500, detail="Internal Server Error")	
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
